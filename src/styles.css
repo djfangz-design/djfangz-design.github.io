@@ -31,75 +31,86 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-brand-green: var(--brand-green);
+  --color-brand-olive: var(--brand-olive);
+  --color-brand-copper: var(--brand-copper);
   --color-brand-brown: var(--brand-brown);
-  --color-brand-beige: var(--brand-beige);
-  --color-brand-whatsapp: var(--brand-whatsapp);
-  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-cream: var(--brand-cream);
+  --font-display: "Playfair Display", ui-serif, Georgia, serif;
+  --font-sans: "Raleway", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  --radius: 0.875rem;
+  --radius: 0.75rem;
 
-  /* Brand palette — Nyeneng */
-  --brand-green: oklch(0.48 0.09 142);      /* earthy green */
-  --brand-green-deep: oklch(0.38 0.08 142);
-  --brand-brown: oklch(0.32 0.05 55);       /* dark brown */
-  --brand-beige: oklch(0.94 0.02 80);       /* soft beige */
-  --brand-whatsapp: oklch(0.66 0.18 145);
+  /* Official Nyeneng brand palette (from logo + company profile) */
+  --brand-green: #3D5A2B;     /* forest green */
+  --brand-olive: #6B8F4E;     /* moss / lighter green */
+  --brand-copper: #A0724A;    /* copper brown */
+  --brand-brown: #6B4726;     /* deep brown */
+  --brand-cream: #faf6ef;     /* warm cream */
+  --brand-dark: #2a1a0a;      /* near-black brown */
 
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.18 0.02 60);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 60);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 60);
-  --primary: var(--brand-green);
-  --primary-foreground: oklch(0.99 0.005 80);
-  --secondary: var(--brand-beige);
-  --secondary-foreground: var(--brand-brown);
-  --muted: oklch(0.96 0.01 80);
-  --muted-foreground: oklch(0.45 0.02 60);
-  --accent: var(--brand-brown);
-  --accent-foreground: oklch(0.99 0.005 80);
+  --background: #ffffff;
+  --foreground: #2a1a0a;
+  --card: #ffffff;
+  --card-foreground: #2a1a0a;
+  --popover: #ffffff;
+  --popover-foreground: #2a1a0a;
+  --primary: #3D5A2B;
+  --primary-foreground: #faf6ef;
+  --secondary: #faf6ef;
+  --secondary-foreground: #3D2B1A;
+  --muted: #f3eee4;
+  --muted-foreground: #6b5a48;
+  --accent: #6B4726;
+  --accent-foreground: #faf6ef;
   --destructive: oklch(0.58 0.22 27);
-  --destructive-foreground: oklch(0.99 0.005 80);
-  --border: oklch(0.9 0.015 80);
-  --input: oklch(0.92 0.012 80);
-  --ring: var(--brand-green);
+  --destructive-foreground: #faf6ef;
+  --border: #e5ddd0;
+  --input: #e5ddd0;
+  --ring: #6B8F4E;
 
-  --shadow-soft: 0 10px 30px -12px oklch(0.32 0.05 55 / 0.18);
-  --shadow-card: 0 4px 16px -6px oklch(0.32 0.05 55 / 0.12);
-  --gradient-hero: linear-gradient(135deg, oklch(0.32 0.05 55 / 0.85), oklch(0.38 0.08 142 / 0.7));
-  --gradient-brand: linear-gradient(135deg, var(--brand-green), var(--brand-green-deep));
+  --shadow-soft: 0 12px 40px -14px rgba(60, 40, 15, 0.28);
+  --shadow-card: 0 6px 18px -8px rgba(60, 40, 15, 0.18);
+  --gradient-hero: linear-gradient(160deg, rgba(42, 26, 10, 0.85) 0%, rgba(61, 90, 43, 0.7) 60%, rgba(160, 114, 74, 0.55) 100%);
+  --gradient-brand: linear-gradient(135deg, #3D5A2B 0%, #6B8F4E 100%);
+  --gradient-bar: linear-gradient(90deg, #3D5A2B 0%, #6B8F4E 35%, #A0724A 65%, #6B4726 100%);
 }
 
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
-  html {
-    scroll-behavior: smooth;
-  }
+  * { border-color: var(--color-border); }
+  html { scroll-behavior: smooth; }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--brand-dark);
   }
 }
 
 @layer utilities {
   .bg-gradient-hero { background-image: var(--gradient-hero); }
   .bg-gradient-brand { background-image: var(--gradient-brand); }
+  .bg-gradient-bar { background-image: var(--gradient-bar); }
   .shadow-soft { box-shadow: var(--shadow-soft); }
   .shadow-card { box-shadow: var(--shadow-card); }
   .text-balance { text-wrap: balance; }
   .container-x { @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8; }
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--brand-copper);
+  }
 }
 
 @keyframes float-up {
