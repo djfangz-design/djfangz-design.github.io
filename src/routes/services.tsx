@@ -8,16 +8,44 @@ import {
 import { PageHeader } from "@/components/PageHeader";
 import { SITE, whatsappLink } from "@/lib/site";
 
+const SITE_URL = "https://nyeneng-builds-futures.lovable.app";
+const SERVICES_URL = `${SITE_URL}/services`;
+const SERVICES_TITLE = "Construction, Boreholes, Plumbing & Electrical Services in Rustenburg | Nyeneng";
+const SERVICES_DESC = "Trusted Rustenburg builders for new homes, borehole drilling, JoJo tanks, plumbing, electrical (COC), welding, tiling & materials supply across the North West. Get a free WhatsApp quote.";
+
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "Services | Construction, Boreholes, Plumbing, Electrical — Nyeneng" },
-      { name: "description", content: "Residential construction, borehole drilling, JoJo tanks, plumbing, electrical, welding, tiling & material supply across Rustenburg & North West." },
-      { property: "og:title", content: "Our Services — Nyeneng Trading & Projects" },
-      { property: "og:description", content: "Seven core trades, one reliable partner. Rustenburg, North West." },
-      { property: "og:url", content: "/services" },
+      { title: SERVICES_TITLE },
+      { name: "description", content: SERVICES_DESC },
+      { name: "keywords", content: "construction Rustenburg, borehole drilling North West, JoJo tank installation, plumber Rustenburg, electrician COC, welding fabrication, tiling, building materials" },
+      { name: "robots", content: "index, follow" },
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Nyeneng Trading & Projects" },
+      { property: "og:title", content: SERVICES_TITLE },
+      { property: "og:description", content: SERVICES_DESC },
+      { property: "og:url", content: SERVICES_URL },
+      { property: "og:locale", content: "en_ZA" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: SERVICES_TITLE },
+      { name: "twitter:description", content: SERVICES_DESC },
     ],
-    links: [{ rel: "canonical", href: "/services" }],
+    links: [{ rel: "canonical", href: SERVICES_URL }],
+    scripts: [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: "Nyeneng Services",
+        itemListElement: [
+          "Residential Construction", "Water Security Solutions", "Electrical Services",
+          "Plumbing", "Welding & Fabrication", "Tiling & Finishing", "Materials Supply",
+        ].map((name, i) => ({
+          "@type": "ListItem", position: i + 1,
+          item: { "@type": "Service", name, areaServed: "Rustenburg, North West, South Africa", provider: { "@type": "LocalBusiness", name: "Nyeneng Trading & Projects" } },
+        })),
+      }),
+    }],
   }),
   component: ServicesPage,
 });
