@@ -5,7 +5,7 @@ export const SITE = {
   established: 2016,
   phone: "+27 72 129 6893",
   phoneRaw: "27721296893",
-  email: "tlhabane2016@gmail.com",
+  email: "info@nyeneng.co.za",
   address: "556 Ngeneng Section, Lefaragatlha, Rustenburg, North West, 0336",
   city: "Rustenburg",
   hours: ["Mon – Fri: 08:00 – 17:00", "Sat: By Appointment", "Sun: Closed"],
