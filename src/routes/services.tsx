@@ -90,12 +90,21 @@ const SERVICES = [
 
 const SERVICE_TITLES = SERVICES.map((s) => s.title);
 
+const contactRegex = /^(?:\+?\d[\d\s\-()]{6,}|[^\s@]+@[^\s@]+\.[^\s@]+)$/;
 const schema = z.object({
-  name: z.string().trim().min(2, "Please enter your name").max(100),
-  contact: z.string().trim().min(7, "Phone or email required").max(100),
-  service: z.string().min(1, "Please choose a service"),
-  location: z.string().trim().min(2, "Where is the project?").max(120),
-  details: z.string().trim().max(600).optional().or(z.literal("")),
+  name: z.string().trim()
+    .min(2, "Please enter your full name (at least 2 characters).")
+    .max(100, "Name is too long — please keep it under 100 characters.")
+    .regex(/^[\p{L}\s'.-]+$/u, "Name can only contain letters, spaces, hyphens and apostrophes."),
+  contact: z.string().trim()
+    .min(7, "Please enter a phone number or email so we can reply.")
+    .max(100, "That contact looks too long — please double-check it.")
+    .regex(contactRegex, "Enter a valid phone number (e.g. 072 123 4567) or email address."),
+  service: z.string().min(1, "Please pick the service you need."),
+  location: z.string().trim()
+    .min(2, "Tell us where the project is (suburb / town).")
+    .max(120, "Location is too long — please shorten it."),
+  details: z.string().trim().max(600, "Please keep details under 600 characters.").optional().or(z.literal("")),
 });
 
 function ServicesPage() {
