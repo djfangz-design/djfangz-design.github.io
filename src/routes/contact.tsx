@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { z } from "zod";
-import { Mail, MapPin, Phone, Clock, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Mail, MapPin, Phone, Clock, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { SITE, whatsappLink } from "@/lib/site";
+import { contactFormSchema, saveLead, isWhatsAppAvailable, checkPopupBlocked, sendLeadViaEmail } from "@/lib/forms";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -20,37 +20,87 @@ export const Route = createFileRoute("/contact")({
 });
 
 const SERVICES = [
-  "Residential Construction", "Water / Borehole / JoJo", "Electrical", "Plumbing",
-  "Welding & Fabrication", "Tiling & Finishing", "Materials Supply", "Other",
+  "Residential Construction",
+  "Water / Borehole / JoJo",
+  "Electrical",
+  "Plumbing",
+  "Welding & Fabrication",
+  "Tiling & Finishing",
+  "Materials Supply",
+  "Other",
 ];
-
-const schema = z.object({
-  name: z.string().trim().min(2, "Please enter your name").max(100),
-  phone: z.string().trim().min(7, "Please enter a valid phone").max(20),
-  email: z.string().trim().email("Invalid email").max(255).optional().or(z.literal("")),
-  service: z.string().min(1, "Please choose a service"),
-  message: z.string().trim().min(10, "Tell us a bit more").max(1000),
-});
 
 function ContactPage() {
   const [sent, setSent] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [whatsappAvailable, setWhatsappAvailable] = useState(true);
+  const [useEmailFallback, setUseEmailFallback] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<{ type: "idle" | "sending" | "success" | "error"; message: string }>({
+    type: "idle",
+    message: "",
+  });
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    setWhatsappAvailable(isWhatsAppAvailable());
+  }, []);
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+    setErrors({});
+
     const fd = new FormData(e.currentTarget);
     const data = Object.fromEntries(fd) as Record<string, string>;
-    const r = schema.safeParse(data);
+    const r = contactFormSchema.safeParse(data);
+
     if (!r.success) {
       const errs: Record<string, string> = {};
-      r.error.issues.forEach((i) => { errs[i.path[0] as string] = i.message; });
+      r.error.issues.forEach((i) => {
+        errs[i.path[0] as string] = i.message;
+      });
       setErrors(errs);
+      setLoading(false);
       return;
     }
-    setErrors({});
-    const msg = `New enquiry from ${r.data.name}\nPhone: ${r.data.phone}\nEmail: ${r.data.email || "-"}\nService: ${r.data.service}\n\n${r.data.message}`;
-    window.open(whatsappLink(msg), "_blank", "noopener");
-    setSent(true);
+
+    // Save lead first
+    const lead = saveLead(r.data, "offline", false);
+
+    if (useEmailFallback) {
+      // Try email
+      setEmailStatus({ type: "sending", message: "Sending your enquiry..." });
+      const result = await sendLeadViaEmail(lead);
+      setLoading(false);
+
+      if (result.success) {
+        setEmailStatus({ type: "success", message: result.message });
+        setSent(true);
+      } else {
+        setEmailStatus({ type: "error", message: "Email service not available. Please call or WhatsApp us directly." });
+      }
+    } else {
+      // Try WhatsApp
+      const msg = `New enquiry from ${r.data.name}\nPhone: ${r.data.phone}\nEmail: ${r.data.email || "-"}\nService: ${r.data.service}\n\n${r.data.message}`;
+      const whatsappUrl = whatsappLink(msg);
+
+      const popup = window.open(whatsappUrl, "_blank", "noopener");
+      const popupBlocked = checkPopupBlocked(popup);
+
+      setLoading(false);
+
+      if (popupBlocked) {
+        // If popup was blocked, ask if they want to try email
+        setEmailStatus({
+          type: "error",
+          message: "WhatsApp popup blocked. Would you like to send via email instead?",
+        });
+        setUseEmailFallback(true);
+      } else {
+        setSent(true);
+        saveLead(lead, "whatsapp", true);
+      }
+    }
   };
 
   return (
@@ -66,9 +116,11 @@ function ContactPage() {
         <div className="lg:col-span-3">
           <div className="rounded-3xl border bg-card p-6 shadow-card md:p-8">
             <h2 className="font-display text-2xl font-bold text-accent">Quick Quote Request</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Submitting opens a pre-filled WhatsApp chat with our team.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {useEmailFallback ? "Send your enquiry via email" : "Submitting opens a pre-filled WhatsApp chat with our team."}
+            </p>
 
-            {sent ? (
+            {sent && !useEmailFallback ? (
               <div className="mt-6 flex items-start gap-3 rounded-2xl bg-secondary p-5">
                 <CheckCircle2 className="mt-0.5 h-6 w-6 text-primary" />
                 <div>
@@ -76,30 +128,73 @@ function ContactPage() {
                   <p className="mt-1 text-sm text-muted-foreground">If WhatsApp didn't open automatically, you can also reach us on {SITE.phone}.</p>
                 </div>
               </div>
+            ) : emailStatus.type === "success" ? (
+              <div className="mt-6 flex items-start gap-3 rounded-2xl bg-secondary p-5">
+                <CheckCircle2 className="mt-0.5 h-6 w-6 text-primary" />
+                <div>
+                  <div className="font-semibold text-accent">{emailStatus.message}</div>
+                  <p className="mt-1 text-sm text-muted-foreground">Our team will respond within 24 hours to your email.</p>
+                </div>
+              </div>
             ) : (
-              <form onSubmit={onSubmit} className="mt-6 grid gap-4 sm:grid-cols-2">
-                <Field label="Full name" name="name" error={errors.name} required />
-                <Field label="Phone / WhatsApp" name="phone" type="tel" error={errors.phone} required />
-                <Field label="Email (optional)" name="email" type="email" error={errors.email} />
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-accent">Service <span className="text-destructive">*</span></label>
-                  <select name="service" defaultValue="" className="h-11 rounded-xl border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-                    <option value="" disabled>Select a service…</option>
-                    {SERVICES.map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                  {errors.service && <p className="text-xs text-destructive">{errors.service}</p>}
-                </div>
-                <div className="sm:col-span-2 flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-accent">Project details <span className="text-destructive">*</span></label>
-                  <textarea name="message" rows={5} maxLength={1000}
-                    className="rounded-xl border bg-background p-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                    placeholder="Tell us about your project, location and timeline…" />
-                  {errors.message && <p className="text-xs text-destructive">{errors.message}</p>}
-                </div>
-                <button type="submit" className="sm:col-span-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-soft hover:opacity-95">
-                  Send via WhatsApp
-                </button>
-              </form>
+              <>
+                {emailStatus.type === "error" && (
+                  <div className="mt-6 flex items-start gap-3 rounded-2xl bg-destructive/10 p-5">
+                    <AlertCircle className="mt-0.5 h-6 w-6 text-destructive" />
+                    <div>
+                      <div className="font-semibold text-destructive">Unable to open WhatsApp</div>
+                      <p className="mt-1 text-sm text-muted-foreground">{emailStatus.message}</p>
+                    </div>
+                  </div>
+                )}
+
+                <form onSubmit={onSubmit} className="mt-6 grid gap-4 sm:grid-cols-2">
+                  <Field label="Full name" name="name" error={errors.name} required />
+                  <Field label="Phone / WhatsApp" name="phone" type="tel" error={errors.phone} required />
+                  <Field label="Email (optional)" name="email" type="email" error={errors.email} />
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-medium text-accent">
+                      Service <span className="text-destructive">*</span>
+                    </label>
+                    <select
+                      name="service"
+                      defaultValue=""
+                      className="h-11 rounded-xl border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="" disabled>
+                        Select a service…
+                      </option>
+                      {SERVICES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.service && <p className="text-xs text-destructive">{errors.service}</p>}
+                  </div>
+                  <div className="sm:col-span-2 flex flex-col gap-1.5">
+                    <label className="text-sm font-medium text-accent">
+                      Project details <span className="text-destructive">*</span>
+                    </label>
+                    <textarea
+                      name="message"
+                      rows={5}
+                      maxLength={1000}
+                      className="rounded-xl border bg-background p-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      placeholder="Tell us about your project, location and timeline…"
+                    />
+                    {errors.message && <p className="text-xs text-destructive">{errors.message}</p>}
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="sm:col-span-2 flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-soft hover:opacity-95 disabled:opacity-50"
+                  >
+                    {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {useEmailFallback ? "Send via Email" : "Send via WhatsApp"}
+                  </button>
+                </form>
+              </>
             )}
           </div>
         </div>
@@ -119,7 +214,10 @@ function ContactPage() {
           <iframe
             title="Nyeneng location"
             src="https://www.google.com/maps?q=Lefaragatlha,+Rustenburg,+North+West,+South+Africa&output=embed"
-            width="100%" height="420" loading="lazy" referrerPolicy="no-referrer-when-downgrade"
+            width="100%"
+            height="420"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
             className="block w-full"
           />
         </div>
@@ -128,8 +226,18 @@ function ContactPage() {
   );
 }
 
-function Field({ label, name, type = "text", error, required }: {
-  label: string; name: string; type?: string; error?: string; required?: boolean;
+function Field({
+  label,
+  name,
+  type = "text",
+  error,
+  required,
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  error?: string;
+  required?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -137,7 +245,9 @@ function Field({ label, name, type = "text", error, required }: {
         {label} {required && <span className="text-destructive">*</span>}
       </label>
       <input
-        name={name} type={type} maxLength={255}
+        name={name}
+        type={type}
+        maxLength={255}
         className="h-11 rounded-xl border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
       />
       {error && <p className="text-xs text-destructive">{error}</p>}
@@ -145,8 +255,18 @@ function Field({ label, name, type = "text", error, required }: {
   );
 }
 
-function ContactCard({ icon: Icon, title, lines, href, cta }: {
-  icon: React.ComponentType<{ className?: string }>; title: string; lines: string[]; href?: string; cta?: string;
+function ContactCard({
+  icon: Icon,
+  title,
+  lines,
+  href,
+  cta,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  lines: string[];
+  href?: string;
+  cta?: string;
 }) {
   return (
     <div className="rounded-2xl border bg-card p-5 shadow-card">
@@ -156,9 +276,15 @@ function ContactCard({ icon: Icon, title, lines, href, cta }: {
         </div>
         <div className="flex-1">
           <div className="font-display text-base font-semibold text-accent">{title}</div>
-          {lines.map((l) => <div key={l} className="mt-0.5 text-sm text-muted-foreground">{l}</div>)}
+          {lines.map((l) => (
+            <div key={l} className="mt-0.5 text-sm text-muted-foreground">
+              {l}
+            </div>
+          ))}
           {href && cta && (
-            <a href={href} className="mt-2 inline-block text-sm font-semibold text-primary hover:underline">{cta} →</a>
+            <a href={href} className="mt-2 inline-block text-sm font-semibold text-primary hover:underline">
+              {cta} →
+            </a>
           )}
         </div>
       </div>
