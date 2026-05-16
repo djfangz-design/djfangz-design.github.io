@@ -1,18 +1,86 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Meta Tags -->
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Nyeneng Trading & Projects — Multi-Trade Construction in Rustenburg</title>
-    <meta name="description" content="Construction, borehole drilling, JoJo tanks, plumbing, electrical, welding & tiling in Rustenburg, North West. SANS-compliant." />
-    <meta name="author" content="Nyeneng Trading & Projects" />
-    <meta property="og:title" content="Nyeneng Trading & Projects — Multi-Trade Construction in Rustenburg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Nyeneng Trading & Projects - Professional Business Solutions" />
+    <meta name="theme-color" content="#667eea" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Nyeneng Trading & Projects" />
+    <meta property="og:description" content="Professional Business Solutions" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Nyeneng Trading & Projects" />
+    <meta property="og:url" content="https://www.nyeneng.co.za" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Nyeneng Trading & Projects" />
+    <meta name="twitter:description" content="Professional Business Solutions" />
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    
+    <!-- Fonts (optional) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Title -->
+    <title>Nyeneng Trading & Projects</title>
+
+    <!-- GitHub Pages SPA Fix -->
+    <script type="text/javascript">
+      // This script handles SPA routing on GitHub Pages
+      // When a 404 is hit, redirect to index.html with path preserved
+      (function() {
+        let redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        
+        // If we have a stored redirect from 404.html, use it
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+
+      // Handle 404 redirects
+      if (location.pathname !== '/' && location.pathname !== '' && !location.pathname.endsWith('.html')) {
+        // Store the intended path in case we hit a 404
+        const path = location.pathname + location.search + location.hash;
+        sessionStorage.redirect = path;
+      }
+    </script>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/start.tsx"></script>
+    <!-- Root element for React -->
+    <div id="root"></div>
+
+    <!-- Main application script -->
+    <!-- Note: Vite automatically injects the entry point, don't manually add script tags -->
+    <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Fallback for JavaScript disabled -->
+    <noscript>
+      <div style="
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        font-family: system-ui, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+      ">
+        <div>
+          <h1>JavaScript Required</h1>
+          <p>Please enable JavaScript to use this application.</p>
+        </div>
+      </div>
+    </noscript>
   </body>
 </html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nyeneng Trading & Projects</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+        
+        p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .loading {
+            display: inline-block;
+            margin: 2rem 0;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .info {
+            background: #f0f7ff;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            text-align: left;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        .info code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Redirecting...</h1>
+        <p>Loading your page, please wait.</p>
+        <div class="loading">
+            <div class="spinner"></div>
+        </div>
+        <div class="info">
+            <strong>This is a fallback page</strong><br/>
+            If you're not redirected automatically in 3 seconds, 
+            <a href="/">click here to go home</a>.
+        </div>
+    </div>
+
+    <script>
+        // SPA Routing Fallback
+        // This file handles 404 errors from GitHub Pages
+        // and redirects them back to index.html for client-side routing
+        
+        (function() {
+            // Check if we're in a 404 scenario
+            const redirect = sessionStorage.redirect;
+            delete sessionStorage.redirect;
+            
+            if (redirect && redirect !== location.href) {
+                history.replaceState(null, null, redirect);
+                console.log('🔄 Redirecting to:', redirect);
+            } else {
+                // If no stored redirect, go to home
+                location.href = '/';
+            }
+        })();
+
+        // Fallback timeout - go home if something goes wrong
+        setTimeout(() => {
+            if (document.location.pathname !== '/') {
+                document.location.href = '/';
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
