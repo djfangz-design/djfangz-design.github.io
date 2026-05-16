@@ -77,7 +77,14 @@ export const Route = createFileRoute("/services")({
             "Plumbing", "Welding & Fabrication", "Tiling & Finishing", "Materials Supply",
           ].map((name, i) => ({
             "@type": "ListItem", position: i + 1,
-            item: { "@type": "Service", name, areaServed: "Rustenburg, North West, South Africa", provider: { "@type": "LocalBusiness", name: "Nyeneng Trading & Projects" } },
+            item: {
+              "@type": "Service",
+              name,
+              serviceType: name,
+              areaServed: "Rustenburg, North West, South Africa",
+              provider: { "@id": "https://nyeneng-builds-futures.lovable.app/#business" },
+              url: `https://nyeneng-builds-futures.lovable.app/services#${name.toLowerCase().replace(/[^a-z]+/g, "-")}`,
+            },
           })),
         }),
       },
