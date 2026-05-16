@@ -65,21 +65,35 @@ export const Route = createFileRoute("/services")({
       { name: "twitter:description", content: SERVICES_DESC },
     ],
     links: [{ rel: "canonical", href: SERVICES_URL }],
-    scripts: [{
-      type: "application/ld+json",
-      children: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        name: "Nyeneng Services",
-        itemListElement: [
-          "Residential Construction", "Water Security Solutions", "Electrical Services",
-          "Plumbing", "Welding & Fabrication", "Tiling & Finishing", "Materials Supply",
-        ].map((name, i) => ({
-          "@type": "ListItem", position: i + 1,
-          item: { "@type": "Service", name, areaServed: "Rustenburg, North West, South Africa", provider: { "@type": "LocalBusiness", name: "Nyeneng Trading & Projects" } },
-        })),
-      }),
-    }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Nyeneng Services",
+          itemListElement: [
+            "Residential Construction", "Water Security Solutions", "Electrical Services",
+            "Plumbing", "Welding & Fabrication", "Tiling & Finishing", "Materials Supply",
+          ].map((name, i) => ({
+            "@type": "ListItem", position: i + 1,
+            item: { "@type": "Service", name, areaServed: "Rustenburg, North West, South Africa", provider: { "@type": "LocalBusiness", name: "Nyeneng Trading & Projects" } },
+          })),
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: FAQS.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }),
+      },
+    ],
   }),
   component: ServicesPage,
 });
