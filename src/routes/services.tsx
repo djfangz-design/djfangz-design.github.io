@@ -209,6 +209,8 @@ function ServicesPage() {
         </div>
       </section>
 
+      <FaqSection />
+
       <QuoteForm services={SERVICE_TITLES} />
     </>
   );
