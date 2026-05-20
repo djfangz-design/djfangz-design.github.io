@@ -37,10 +37,15 @@ const copySpecialFiles = () => {
   }
 }
 
+// Base path handling for GitHub Pages sub-path deployments.
+// Set VITE_BASE_PATH (e.g. "/nyeneng/") for project pages, leave unset for
+// custom domains or user/org pages (defaults to "/").
+const rawBase = process.env.VITE_BASE_PATH ?? process.env.BASE_PATH ?? '/'
+const basePath = rawBase === '/' ? '/' : `/${rawBase.replace(/^\/+|\/+$/g, '')}/`
+
 export default defineConfig({
-  // CRITICAL: Base path must be '/' for user/org pages
-  // Only use subdirectory path for project pages (e.g., /repo-name/)
-  base: '/',
+  base: basePath,
+
 
   plugins: [
     react({
